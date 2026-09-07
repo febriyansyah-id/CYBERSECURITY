@@ -1,0 +1,9 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "soc-automation"
+version = "1.0.0"
+description = "SOC Automation — IR Playbooks, SOAR Workflows, Detection Rules, Incident Reporting"
+requires-python = ">=3.10"
