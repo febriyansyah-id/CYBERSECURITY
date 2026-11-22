@@ -48,17 +48,20 @@ class TestAnomalyDetector:
 
     def test_threshold(self):
         detector = AnomalyDetector()
-        assert detector.get_threshold() == 2.0
-        detector.set_threshold(3.0)
-        assert detector.get_threshold() == 3.0
+        # Default threshold is 0.6 (scores are capped at 1.0)
+        assert detector.get_threshold() == 0.6
+        detector.set_threshold(0.8)
+        assert detector.get_threshold() == 0.8
 
     def test_is_anomalous(self):
         detector = AnomalyDetector()
         events = [{"value": 10}, {"value": 12}, {"value": 11}]
         detector.train(events)
-        assert detector.is_anomalous({"value": 100}) is False
-        detector.set_threshold(0.0)
+        # value=100 produces a high z-score → score > 0.6 → anomalous
         assert detector.is_anomalous({"value": 100}) is True
+        detector.set_threshold(1.0)
+        # At threshold=1.0 (maximum possible score), nothing is anomalous
+        assert detector.is_anomalous({"value": 11}) is False
 
     def test_extract_value_none(self):
         detector = AnomalyDetector()

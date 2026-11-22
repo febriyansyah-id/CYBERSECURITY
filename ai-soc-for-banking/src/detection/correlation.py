@@ -84,17 +84,23 @@ class CorrelationEngine:
 
     def evaluate(self) -> list[CorrelatedIncident]:
         new_incidents = []
+        now = datetime.now()
         for rule in self._rules:
+            # Enforce time window — only consider events within window_minutes
+            cutoff = now - timedelta(minutes=rule.window_minutes)
+            events_in_window = [
+                e for e in self._events
+                if self._event_in_window(e, cutoff)
+            ]
+
             matched_sets = []
             for condition in rule.conditions:
-                matched = [e for e in self._events if self._matches_condition(e, condition)]
+                matched = [e for e in events_in_window if self._matches_condition(e, condition)]
                 if not matched:
                     break
                 matched_sets.append(matched)
+
             if len(matched_sets) == len(rule.conditions):
-                ids = []
-                for s in matched_sets:
-                    ids.append(s[0].get("id", ""))
                 self._counter += 1
                 incident = CorrelatedIncident(
                     id=f"INC-{self._counter:04d}",
@@ -102,11 +108,22 @@ class CorrelationEngine:
                     rule_name=rule.name,
                     events=[e for s in matched_sets for e in s],
                     severity=rule.severity,
-                    timestamp=datetime.now().isoformat(),
+                    timestamp=now.isoformat(),
                 )
                 new_incidents.append(incident)
                 self._incidents.append(incident)
         return new_incidents
+
+    def _event_in_window(self, event: dict, cutoff: datetime) -> bool:
+        """Return True if the event timestamp is within the correlation window."""
+        ts_raw = event.get("timestamp")
+        if not ts_raw:
+            return True  # no timestamp → assume recent
+        try:
+            ts = datetime.fromisoformat(str(ts_raw))
+            return ts >= cutoff
+        except (ValueError, TypeError):
+            return True  # unparseable → include by default
 
     def _matches_condition(self, event: dict, condition: dict) -> bool:
         for key, value in condition.items():

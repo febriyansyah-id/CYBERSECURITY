@@ -1,6 +1,9 @@
 # Python cache
 __pycache__/
+**/__pycache__/
 *.py[cod]
+*.pyc
+*.pyo
 *.egg-info/
 .pytest_cache/
 .mypy_cache/
@@ -13,3 +16,25 @@ env/
 
 # Jupyter
 .ipynb_checkpoints/
+
+# ML models (large binaries — regenerate via training scripts)
+*.joblib
+*.pkl
+*.pickle
+*.h5
+*.pt
+*.pth
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp

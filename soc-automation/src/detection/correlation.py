@@ -32,7 +32,8 @@ class CorrelationEngine:
                 a for a in self.alerts
                 if (a.get('timestamp') or now) >= window_start
             ]
-            if len(window_alerts) >= 2:
+            # Use the rule's condition functions to validate the alert window
+            if rule.matches(window_alerts):
                 incident = {
                     'rule_id': rule.id,
                     'rule_name': rule.name,

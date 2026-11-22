@@ -5,7 +5,9 @@ from typing import Any
 class AnomalyDetector:
     def __init__(self):
         self._baseline: dict[str, float] = {}
-        self._threshold: float = 2.0
+        # detect() returns a score in [0.0, 1.0]; threshold must be in that range.
+        # 0.6 ≈ z-score of 3.0, a standard 3-sigma anomaly threshold.
+        self._threshold: float = 0.6
 
     def train(self, events: list[dict]) -> None:
         values: list[float] = []

@@ -1,7 +1,10 @@
+import logging
 import os
 import time
 from datetime import datetime
 from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 
 class LogSource:
@@ -52,9 +55,11 @@ class IngestionEngine:
             self._events_ingested += len(lines)
             return [l.strip() for l in lines if l.strip()]
         except FileNotFoundError:
+            logger.warning("Log source not found: %s", path)
             self._errors += 1
             return []
         except Exception:
+            logger.exception("Unexpected error reading log source: %s", path)
             self._errors += 1
             return []
 

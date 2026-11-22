@@ -28,9 +28,22 @@ class TestRiskAssessment:
         assert threat.impact == 5
 
     def test_calculate_score(self):
+        # With default control_effectiveness=0.4 → residual = 20 * (1 - 0.4) = 12.0
         inherent, residual = calculate_score(4, 5)
         assert inherent == 20.0
         assert residual == 12.0
+
+    def test_calculate_score_no_controls(self):
+        # With no controls (effectiveness=0.0) → residual equals inherent
+        inherent, residual = calculate_score(4, 5, control_effectiveness=0.0)
+        assert inherent == 20.0
+        assert residual == 20.0
+
+    def test_calculate_score_full_controls(self):
+        # With full control coverage (effectiveness=1.0) → residual = 0
+        inherent, residual = calculate_score(4, 5, control_effectiveness=1.0)
+        assert inherent == 20.0
+        assert residual == 0.0
 
     def test_risk_levels(self):
         assert risk_level(25) == "Critical"

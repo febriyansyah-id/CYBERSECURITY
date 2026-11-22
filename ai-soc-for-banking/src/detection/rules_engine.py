@@ -1,6 +1,17 @@
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
+import logging
+
+logger = logging.getLogger(__name__)
+
+# Standard ports — connections to others are flagged as unusual
+STANDARD_PORTS: set[int] = {80, 443, 22, 3306, 5432, 25, 53, 8080, 8443}
+
+# High-risk country codes (ISO 3166-1 alpha-2)
+HIGH_RISK_COUNTRIES: set[str] = {
+    "KP", "IR", "RU", "CN", "SY", "CU", "VE", "BY", "MM", "AF",
+}
 
 
 @dataclass
@@ -56,6 +67,40 @@ BUILTIN_RULES = [
     ),
 ]
 
+# ---------------------------------------------------------------------------
+# Stateful condition helpers
+# ---------------------------------------------------------------------------
+
+def _check_stateful_conditions(rule: DetectionRule, event: dict) -> bool:
+    """Evaluate conditions that require contextual / meta-data about the event.
+
+    Returns True when all stateful conditions in the rule are satisfied,
+    or when the rule has no stateful conditions (not applicable).
+    """
+    conditions = rule.conditions
+
+    # --- country_risk: compare against HIGH_RISK_COUNTRIES lookup ---
+    if "country_risk" in conditions:
+        required = conditions["country_risk"]
+        country = event.get("country_code", "")
+        is_high_risk = country.upper() in HIGH_RISK_COUNTRIES
+        if required == "high" and not is_high_risk:
+            return False
+
+    # --- port: flag connections to non-standard ports ---
+    if "port" in conditions:
+        required = conditions["port"]
+        port = event.get("dest_port") or event.get("port")
+        if required == "unusual":
+            try:
+                if int(port) in STANDARD_PORTS:
+                    return False
+            except (TypeError, ValueError):
+                return False  # malformed port field → no match
+
+    # min_count / window_minutes are handled by evaluate_window(); skip here.
+    return True
+
 
 class RulesEngine:
     def __init__(self):
@@ -71,18 +116,78 @@ class RulesEngine:
         return list(self._rules)
 
     def evaluate(self, event: dict) -> list[str]:
+        """Evaluate a single event against all loaded rules.
+
+        Stateful conditions (min_count / window_minutes) are skipped here;
+        use evaluate_window() for time-windowed, count-based detection.
+        """
         matched = []
         for rule in self._rules:
-            conditions_met = 0
-            total_conditions = 0
-            for key, value in rule.conditions.items():
-                if key in ("min_count", "window_minutes", "country_risk", "port"):
-                    continue
-                total_conditions += 1
-                if event.get(key) == value:
-                    conditions_met += 1
-            if total_conditions > 0 and conditions_met == total_conditions:
+            # 1. Match simple key=value conditions (skip stateful keys)
+            simple_keys = {
+                k for k in rule.conditions
+                if k not in ("min_count", "window_minutes", "country_risk", "port")
+            }
+            simple_ok = all(event.get(k) == rule.conditions[k] for k in simple_keys)
+            if not simple_ok:
+                continue
+
+            # 2. Evaluate stateful / contextual conditions
+            if not _check_stateful_conditions(rule, event):
+                continue
+
+            matched.append(rule.id)
+        return matched
+
+    def evaluate_window(self, events: list[dict]) -> list[str]:
+        """Evaluate a list of events (time window) for count-based rules.
+
+        Applies min_count + window_minutes filtering in addition to field matching.
+        Call this with a pre-filtered sliding window of recent events.
+        """
+        matched: list[str] = []
+        now = datetime.now()
+
+        for rule in self._rules:
+            min_count = rule.conditions.get("min_count")
+            window_min = rule.conditions.get("window_minutes")
+
+            # Only process count-based rules here
+            if min_count is None:
+                continue
+
+            cutoff = (
+                now - timedelta(minutes=int(window_min))
+                if window_min is not None
+                else datetime.min
+            )
+
+            # Filter events to those within the time window
+            windowed = []
+            for ev in events:
+                ts_raw = ev.get("timestamp", "")
+                try:
+                    ts = datetime.fromisoformat(ts_raw) if ts_raw else now
+                except (ValueError, TypeError):
+                    ts = now
+                if ts >= cutoff:
+                    windowed.append(ev)
+
+            # Match simple field conditions (excluding stateful meta-keys)
+            simple_keys = {
+                k for k in rule.conditions
+                if k not in ("min_count", "window_minutes", "country_risk", "port")
+            }
+            qualifying = [
+                ev for ev in windowed
+                if all(ev.get(k) == rule.conditions[k] for k in simple_keys)
+            ]
+
+            if len(qualifying) >= int(min_count):
+                logger.info(
+                    "Rule %s triggered: %d events matched (required %d)",
+                    rule.id, len(qualifying), min_count,
+                )
                 matched.append(rule.id)
-            elif total_conditions == 0:
-                matched.append(rule.id)
+
         return matched

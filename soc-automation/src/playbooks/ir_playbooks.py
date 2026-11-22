@@ -25,8 +25,21 @@ class Playbook:
         self.references = references or []
 
     def total_estimated_time(self):
+        """Return total estimated time in minutes (30 min per step by default)."""
         total = 0
-        return len(self.steps) * 30
+        for step in self.steps:
+            try:
+                # Parse "30m", "1h", "2h" style strings
+                raw = str(step.estimated_time)
+                if raw.endswith('h'):
+                    total += int(raw[:-1]) * 60
+                elif raw.endswith('m'):
+                    total += int(raw[:-1])
+                else:
+                    total += int(raw)
+            except (ValueError, AttributeError):
+                total += 30  # fallback: 30 min per step
+        return total
 
     def get_steps_by_phase(self, phase):
         return [s for s in self.steps if s.phase == phase]

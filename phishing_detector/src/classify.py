@@ -1,18 +1,24 @@
 import argparse
-import joblib
 import os
 import sys
 import numpy as np
+import joblib
 from phishing_detector.src.features import feature_vector
 
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "models", "phishing_model.joblib")
 
+# Cache model at module level to avoid reloading on every call
+_model = None
+
 
 def load_model():
-    if not os.path.exists(MODEL_PATH):
-        print("Model not found. Run training first: python -m phishing_detector.src.train", file=sys.stderr)
-        sys.exit(1)
-    return joblib.load(MODEL_PATH)
+    global _model
+    if _model is None:
+        if not os.path.exists(MODEL_PATH):
+            print("Model not found. Run training first: python -m phishing_detector.src.train", file=sys.stderr)
+            sys.exit(1)
+        _model = joblib.load(MODEL_PATH)
+    return _model
 
 
 def classify_url(url: str) -> dict:

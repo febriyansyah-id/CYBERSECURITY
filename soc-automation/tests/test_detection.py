@@ -29,11 +29,13 @@ def test_correlation_rules_exist():
 
 def test_correlation_engine_evaluate():
     engine = CorrelationEngine()
+    # CR-001 fires when >= 3 failed_login alerts appear in the window
     engine.add_alert({'type': 'failed_login', 'timestamp': None})
     engine.add_alert({'type': 'failed_login', 'timestamp': None})
     engine.add_alert({'type': 'failed_login', 'timestamp': None})
     incidents = engine.evaluate()
-    assert len(incidents) > 0
+    # CR-001 "Multiple Failed Logins" should match (3 >= 3)
+    assert any(i['rule_id'] == 'CR-001' for i in incidents)
 
 
 def test_correlation_engine_empty():

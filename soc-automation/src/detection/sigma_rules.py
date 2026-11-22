@@ -73,13 +73,35 @@ def validate_sigma_rule(rule):
 
 
 def export_to_yaml(rule):
+    """Export a SigmaRule to YAML string.
+
+    Uses PyYAML when available for correct nested-dict / list serialization;
+    falls back to a safe manual renderer otherwise.
+    """
+    try:
+        import yaml  # optional dependency
+        return yaml.dump(rule.to_dict(), default_flow_style=False, sort_keys=False).rstrip()
+    except ImportError:
+        pass
+
+    # Manual fallback — handles one level of nesting safely
+    def _val(v):
+        if isinstance(v, (list, dict)):
+            return repr(v)
+        return str(v)
+
     lines = [f"title: {rule.title}", f"description: {rule.description}"]
     lines.append("logsource:")
     for k, v in rule.logsource.items():
-        lines.append(f"  {k}: {v}")
+        lines.append(f"  {k}: {_val(v)}")
     lines.append("detection:")
     for k, v in rule.detection.items():
-        lines.append(f"  {k}: {v}")
+        if isinstance(v, dict):
+            lines.append(f"  {k}:")
+            for dk, dv in v.items():
+                lines.append(f"    {dk}: {_val(dv)}")
+        else:
+            lines.append(f"  {k}: {_val(v)}")
     lines.append(f"level: {rule.level}")
     if rule.tags:
         lines.append("tags:")
