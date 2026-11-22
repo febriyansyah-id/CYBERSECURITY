@@ -1,6 +1,6 @@
 # SOC-Automation — Incident Response & SOAR Toolkit
 
-[![CI](https://github.com/febriyansyahresearch-lab/soc-automation/actions/workflows/test.yml/badge.svg)](https://github.com/febriyansyahresearch-lab/soc-automation/actions)
+[![CI](https://github.com/febriyansyah-id/CYBERSECURITY/actions/workflows/test.yml/badge.svg)](https://github.com/febriyansyah-id/CYBERSECURITY/actions)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-41%20passed-brightgreen)](tests/)

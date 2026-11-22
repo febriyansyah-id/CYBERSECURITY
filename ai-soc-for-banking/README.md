@@ -1,6 +1,6 @@
 # AI-SOC for Banking — AI-Powered Security Operations Center
 
-[![CI](https://github.com/febriyansyahresearch-lab/ai-soc-for-banking/actions/workflows/test.yml/badge.svg)](https://github.com/febriyansyahresearch-lab/ai-soc-for-banking/actions/workflows/test.yml)
+[![CI](https://github.com/febriyansyah-id/CYBERSECURITY/actions/workflows/test.yml/badge.svg)](https://github.com/febriyansyah-id/CYBERSECURITY/actions)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://python.org)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -65,8 +65,8 @@ ai-soc-for-banking/
 
 ```bash
 # Clone
-git clone https://github.com/febriyansyahresearch-lab/ai-soc-for-banking.git
-cd ai-soc-for-banking
+git clone https://github.com/febriyansyah-id/CYBERSECURITY.git
+cd CYBERSECURITY/ai-soc-for-banking
 
 # Setup
 python -m venv venv
