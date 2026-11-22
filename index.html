@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Banking AI-SOC Command Center | Cyber Defense & GRC Platform</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { background-color: #0b0f19; color: #e2e8f0; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    .glass-card { background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(56, 189, 248, 0.2); backdrop-filter: blur(12px); border-radius: 12px; }
+    .glass-card-hover:hover { border-color: rgba(56, 189, 248, 0.5); box-shadow: 0 10px 25px -5px rgba(56, 189, 248, 0.15); }
+    .matrix-cell { transition: all 0.2s ease; cursor: pointer; }
+    .matrix-cell:hover { transform: scale(1.08); z-index: 10; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+
+  <!-- Top Navigation Bar -->
+  <header class="border-b border-slate-800 bg-slate-900/80 sticky top-0 z-50 backdrop-blur-md px-6 py-3 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-lg bg-sky-500/10 border border-sky-400/30 flex items-center justify-center text-xl">🛡️</div>
+      <div>
+        <div class="flex items-center space-x-2">
+          <h1 class="text-lg font-bold tracking-tight text-white">BANKING AI-SOC COMMAND CENTER</h1>
+          <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">● LIVE MONITORING</span>
+        </div>
+        <p class="text-xs text-slate-400">POJK No. 11/2022 & NIST SP 800-61 Rev 2 Defense Architecture</p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-4">
+      <div class="hidden md:flex flex-col text-right">
+        <span class="text-xs text-slate-400">Environment</span>
+        <span class="text-xs font-mono font-semibold text-sky-400">CORE-BANKING-PROD-JKT</span>
+      </div>
+      <a href="https://github.com/febriyansyah-id/cybersecurity" target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 border border-slate-700 transition flex items-center space-x-1.5">
+        <span>GitHub Repository</span>
+        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <div class="bg-slate-900/60 border-b border-slate-800 px-6">
+    <nav class="flex space-x-6 text-sm font-medium">
+      <button onclick="switchTab('overview')" id="tab-btn-overview" class="tab-btn py-3 border-b-2 border-sky-400 text-sky-400 flex items-center space-x-2">
+        <span>🛡️</span><span>Overview & Telemetry</span>
+      </button>
+      <button onclick="switchTab('incidents')" id="tab-btn-incidents" class="tab-btn py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
+        <span>🚨</span><span>Incident Response & SOAR</span>
+      </button>
+      <button onclick="switchTab('phishing')" id="tab-btn-phishing" class="tab-btn py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
+        <span>🎯</span><span>AI Phishing URL Inspector</span>
+      </button>
+      <button onclick="switchTab('grc')" id="tab-btn-grc" class="tab-btn py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
+        <span>📋</span><span>Banking GRC & 5x5 Matrix</span>
+      </button>
+      <button onclick="switchTab('sigma')" id="tab-btn-sigma" class="tab-btn py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
+        <span>⚙️</span><span>Sigma Rules & Threat Intel</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 p-6 max-w-7xl mx-auto w-full space-y-6">
+
+    <!-- ==================== TAB 1: OVERVIEW & TELEMETRY ==================== -->
+    <div id="tab-overview" class="tab-content space-y-6">
+      <!-- KPI Metric Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="glass-card p-5">
+          <span class="text-xs font-semibold text-slate-400 tracking-wider uppercase">Ingested Logs (24h)</span>
+          <div class="text-2xl font-bold text-sky-400 mt-2">1,482,910</div>
+          <span class="text-xs text-emerald-400 font-medium">▲ +14.2% vs 7-day baseline</span>
+        </div>
+        <div class="glass-card p-5">
+          <span class="text-xs font-semibold text-slate-400 tracking-wider uppercase">Active Security Alerts</span>
+          <div class="text-2xl font-bold text-amber-400 mt-2">3 Incidents</div>
+          <span class="text-xs text-slate-400">2 Critical, 1 High (Contained)</span>
+        </div>
+        <div class="glass-card p-5">
+          <span class="text-xs font-semibold text-slate-400 tracking-wider uppercase">Mean Time to Detect (MTTD)</span>
+          <div class="text-2xl font-bold text-emerald-400 mt-2">3.8 min</div>
+          <span class="text-xs text-emerald-400 font-medium">▼ SLA target: &lt; 15 min</span>
+        </div>
+        <div class="glass-card p-5">
+          <span class="text-xs font-semibold text-slate-400 tracking-wider uppercase">Mean Time to Respond (MTTR)</span>
+          <div class="text-2xl font-bold text-emerald-400 mt-2">18.4 min</div>
+          <span class="text-xs text-emerald-400 font-medium">▼ SLA target: &lt; 45 min</span>
+        </div>
+      </div>
+
+      <!-- Charts Section -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="glass-card p-5 lg:col-span-2">
+          <h2 class="text-sm font-semibold text-slate-200 mb-4 flex items-center justify-between">
+            <span>24-Hour Telemetry Volume & Threat Spikes</span>
+            <span class="text-xs text-slate-400 font-mono">1-hr resolution</span>
+          </h2>
+          <div class="h-64">
+            <canvas id="telemetryChart"></canvas>
+          </div>
+        </div>
+        <div class="glass-card p-5">
+          <h2 class="text-sm font-semibold text-slate-200 mb-4">MITRE ATT&CK Tactic Breakdown</h2>
+          <div class="h-64 flex items-center justify-center">
+            <canvas id="tacticsChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Stream Table -->
+      <div class="glass-card p-5">
+        <h2 class="text-sm font-semibold text-slate-200 mb-3 flex items-center justify-between">
+          <span>Real-Time Normalized SIEM Event Feed</span>
+          <span class="text-xs text-sky-400">Polling every 2s</span>
+        </h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-800/60 text-slate-400 uppercase text-[10px] tracking-wider">
+              <tr>
+                <th class="p-2.5">Time</th>
+                <th class="p-2.5">Severity</th>
+                <th class="p-2.5">Component</th>
+                <th class="p-2.5">Source IP</th>
+                <th class="p-2.5">Target IP</th>
+                <th class="p-2.5">Rule ID</th>
+                <th class="p-2.5">Alert Details</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800 font-mono text-[11px]" id="logTableBody">
+              <tr class="hover:bg-slate-800/40">
+                <td class="p-2.5 text-slate-400">10:18:24</td>
+                <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-red-500/20 text-red-400 font-bold">CRITICAL</span></td>
+                <td class="p-2.5">SWIFT-Gateway</td>
+                <td class="p-2.5 text-rose-400">198.51.100.22</td>
+                <td class="p-2.5 text-sky-400">10.10.1.15</td>
+                <td class="p-2.5 text-amber-400">CORR-MALWARE-C2</td>
+                <td class="p-2.5 font-sans text-slate-300">Periodic TLS beaconing pattern matched known C2 signature</td>
+              </tr>
+              <tr class="hover:bg-slate-800/40">
+                <td class="p-2.5 text-slate-400">10:17:05</td>
+                <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 font-bold">HIGH</span></td>
+                <td class="p-2.5">Core-Bank-API</td>
+                <td class="p-2.5 text-rose-400">185.220.101.42</td>
+                <td class="p-2.5 text-sky-400">10.20.4.11</td>
+                <td class="p-2.5 text-amber-400">BRUTE-001</td>
+                <td class="p-2.5 font-sans text-slate-300">Multiple failed authentication attempts (min_count: 5, window: 5m)</td>
+              </tr>
+              <tr class="hover:bg-slate-800/40">
+                <td class="p-2.5 text-slate-400">10:15:42</td>
+                <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold">MEDIUM</span></td>
+                <td class="p-2.5">WAF-Perimeter</td>
+                <td class="p-2.5 text-slate-300">45.33.32.156</td>
+                <td class="p-2.5 text-sky-400">10.0.0.80</td>
+                <td class="p-2.5 text-amber-400">PORT-001</td>
+                <td class="p-2.5 font-sans text-slate-300">Unusual port access probe on external DMZ interface</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TAB 2: INCIDENT RESPONSE & SOAR ==================== -->
+    <div id="tab-incidents" class="tab-content hidden space-y-6">
+      <div class="glass-card p-6">
+        <h2 class="text-base font-bold text-white mb-2">Active Banking Security Incidents</h2>
+        <p class="text-xs text-slate-400 mb-4">Execute NIST SP 800-61 Rev 2 incident containment steps and trigger automated SOAR actions.</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="p-4 rounded-lg border border-red-500/30 bg-red-950/20 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-red-400 font-mono">INC-2026-0042</span>
+              <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-red-500/20 text-red-400">CRITICAL</span>
+            </div>
+            <h3 class="text-sm font-semibold text-white">Cobalt Strike Beacon on Core-Banking Staging Host</h3>
+            <p class="text-xs text-slate-400">Target: <code class="text-slate-200">srv-banking-app02.corp.local</code> | C2: <code class="text-red-400">185.220.101.42</code></p>
+            <div class="pt-2 flex flex-wrap gap-2">
+              <button onclick="triggerSoarAction('Firewall Block IP: 185.220.101.42 (48h lease)')" class="px-2.5 py-1 text-xs rounded bg-red-600 hover:bg-red-500 text-white font-medium">🚫 Auto Block IP</button>
+              <button onclick="triggerSoarAction('Endpoint Isolation: srv-banking-app02 disconnected from subnets')" class="px-2.5 py-1 text-xs rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700">🔒 EDR Isolate Host</button>
+              <button onclick="triggerSoarAction('TheHive Case #0042 updated with high-priority analyst triage tag')" class="px-2.5 py-1 text-xs rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700">🎫 Sync TheHive</button>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-lg border border-orange-500/30 bg-orange-950/20 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-orange-400 font-mono">INC-2026-0043</span>
+              <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-orange-500/20 text-orange-400">HIGH</span>
+            </div>
+            <h3 class="text-sm font-semibold text-white">Spear-Phishing Credential Harvester targeting Treasury Desk</h3>
+            <p class="text-xs text-slate-400">Vector: Spoofed email with embedded login portal | Sender IP: <code class="text-orange-400">194.26.29.11</code></p>
+            <div class="pt-2 flex flex-wrap gap-2">
+              <button onclick="triggerSoarAction('Purged 14 malicious emails from Exchange mailboxes across treasury group')" class="px-2.5 py-1 text-xs rounded bg-orange-600 hover:bg-orange-500 text-white font-medium">✉️ Purge Mailbox</button>
+              <button onclick="triggerSoarAction('Force MFA Password Reset initiated for 6 targeted accounts')" class="px-2.5 py-1 text-xs rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700">🔑 Force MFA Reset</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="soarToast" class="hidden mt-4 p-3 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-medium flex items-center space-x-2">
+          <span>⚡</span><span id="soarToastMsg">Action executed</span>
+        </div>
+      </div>
+
+      <!-- NIST Playbook Checklist -->
+      <div class="glass-card p-6">
+        <h3 class="text-sm font-bold text-white mb-3">NIST SP 800-61 Rev 2 Playbook Steps (Malware Incident)</h3>
+        <div class="space-y-2 text-xs">
+          <label class="flex items-center space-x-2 p-2 rounded bg-slate-800/40 hover:bg-slate-800/70 cursor-pointer">
+            <input type="checkbox" checked class="rounded text-sky-500 bg-slate-900 border-slate-700">
+            <span class="font-semibold text-slate-200">1. Identification:</span>
+            <span class="text-slate-400">Confirm file hash on VirusTotal & internal telemetry (Tier-1)</span>
+          </label>
+          <label class="flex items-center space-x-2 p-2 rounded bg-slate-800/40 hover:bg-slate-800/70 cursor-pointer">
+            <input type="checkbox" checked class="rounded text-sky-500 bg-slate-900 border-slate-700">
+            <span class="font-semibold text-slate-200">2. Containment:</span>
+            <span class="text-slate-400">Isolate affected host from network perimeter & block C2 domain at DNS (Tier-2)</span>
+          </label>
+          <label class="flex items-center space-x-2 p-2 rounded bg-slate-800/40 hover:bg-slate-800/70 cursor-pointer">
+            <input type="checkbox" class="rounded text-sky-500 bg-slate-900 border-slate-700">
+            <span class="font-semibold text-slate-200">3. Eradication:</span>
+            <span class="text-slate-400">Remove malicious binaries, persistence keys, and apply security patches (Tier-2)</span>
+          </label>
+          <label class="flex items-center space-x-2 p-2 rounded bg-slate-800/40 hover:bg-slate-800/70 cursor-pointer">
+            <input type="checkbox" class="rounded text-sky-500 bg-slate-900 border-slate-700">
+            <span class="font-semibold text-slate-200">4. Recovery:</span>
+            <span class="text-slate-400">Restore clean system state from verified backups and monitor telemetry (Tier-2)</span>
+          </label>
+          <label class="flex items-center space-x-2 p-2 rounded bg-slate-800/40 hover:bg-slate-800/70 cursor-pointer">
+            <input type="checkbox" class="rounded text-sky-500 bg-slate-900 border-slate-700">
+            <span class="font-semibold text-slate-200">5. Lessons Learned:</span>
+            <span class="text-slate-400">Produce Root Cause Analysis (RCA) and compliance report for management (Tier-3)</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TAB 3: AI PHISHING URL INSPECTOR ==================== -->
+    <div id="tab-phishing" class="tab-content hidden space-y-6">
+      <div class="glass-card p-6">
+        <h2 class="text-base font-bold text-white mb-2">Live AI Phishing URL Inspector</h2>
+        <p class="text-xs text-slate-400 mb-4">Random Forest structural lexical classifier with 10 extracted URL features.</p>
+
+        <div class="space-y-3">
+          <div class="flex gap-2">
+            <input type="text" id="phishUrlInput" value="http://bank-secure-login.xyz/auth?verify=client_id_99" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-sky-500">
+            <button onclick="analyzeUrl()" class="px-5 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs transition">Analyze URL</button>
+          </div>
+
+          <!-- Quick Presets -->
+          <div class="flex flex-wrap gap-2 pt-1 text-xs">
+            <span class="text-slate-400 self-center">Presets:</span>
+            <button onclick="setPhishPreset('http://192.168.1.1/login.php?verify=true')" class="px-2 py-1 rounded bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700">Raw IP Phish</button>
+            <button onclick="setPhishPreset('http://verify-paypal.account-security.updates.com/action')" class="px-2 py-1 rounded bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700">Deep Subdomain Spoof</button>
+            <button onclick="setPhishPreset('https://www.bankmandiri.co.id/en/personal')" class="px-2 py-1 rounded bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700">Legitimate Bank</button>
+          </div>
+        </div>
+
+        <!-- Result Box -->
+        <div id="phishResult" class="mt-6 p-4 rounded-xl border border-red-500/40 bg-red-950/20">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <span class="text-2xl" id="verdictIcon">🚨</span>
+              <div>
+                <h4 class="text-sm font-bold text-red-400" id="verdictText">PHISHING CLASSIFICATION DETECTED</h4>
+                <p class="text-xs text-slate-400" id="verdictSub">Confidence: <b class="text-white" id="verdictConf">91.0%</b> | Structural heuristics indicate brand impersonation</p>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30" id="verdictBadge">BLOCK RECOMMENDED</span>
+          </div>
+        </div>
+
+        <!-- Extracted Features Table -->
+        <div class="mt-6">
+          <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Extracted URL Lexical Features</h4>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs font-mono" id="featureGrid">
+            <div class="p-2.5 rounded bg-slate-900 border border-slate-800">
+              <span class="text-slate-500 block text-[10px]">URL LENGTH</span>
+              <span class="text-sky-400 font-bold" id="featLen">52 chars</span>
+            </div>
+            <div class="p-2.5 rounded bg-slate-900 border border-slate-800">
+              <span class="text-slate-500 block text-[10px]">DOT COUNT</span>
+              <span class="text-sky-400 font-bold" id="featDots">2 dots</span>
+            </div>
+            <div class="p-2.5 rounded bg-slate-900 border border-slate-800">
+              <span class="text-slate-500 block text-[10px]">HYPHEN COUNT</span>
+              <span class="text-amber-400 font-bold" id="featHyphens">2 hyphens (Spoof)</span>
+            </div>
+            <div class="p-2.5 rounded bg-slate-900 border border-slate-800">
+              <span class="text-slate-500 block text-[10px]">HTTPS PROTOCOL</span>
+              <span class="text-red-400 font-bold" id="featHttps">NO (HTTP)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TAB 4: BANKING GRC & 5x5 MATRIX ==================== -->
+    <div id="tab-grc" class="tab-content hidden space-y-6">
+      <div class="glass-card p-6">
+        <h2 class="text-base font-bold text-white mb-1">Interactive 5x5 Likelihood × Impact Risk Matrix</h2>
+        <p class="text-xs text-slate-400 mb-6">Compliant with Bank Indonesia / OJK (POJK No. 11/POJK.03/2022) IT Risk Assessment guidelines.</p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          <!-- 5x5 Grid (7 cols) -->
+          <div class="lg:col-span-7 space-y-2">
+            <div class="text-xs font-semibold text-slate-300 text-center mb-1">Impact Scale (1: Negligible ➔ 5: Catastrophic)</div>
+            <div class="grid grid-cols-5 gap-1.5 text-center text-xs font-bold" id="riskMatrixGrid">
+              <!-- Dynamically populated via JS -->
+            </div>
+            <div class="text-xs font-semibold text-slate-400 text-center mt-2">Likelihood: 5 (Frequent) down to 1 (Rare)</div>
+          </div>
+
+          <!-- Dynamic Calculator Card (5 cols) -->
+          <div class="lg:col-span-5 p-5 rounded-xl border border-slate-700 bg-slate-900/90 space-y-4">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-sky-400">Risk Assessment Calculator</h3>
+            
+            <div>
+              <label class="text-xs text-slate-400 block mb-1">Banking Asset Under Evaluation:</label>
+              <select id="grcAsset" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white">
+                <option>Core Banking System (CBS) - Critical</option>
+                <option>Customer Financial Data (PII) - Critical</option>
+                <option>ATM / E-Channel Switch - High</option>
+                <option>SWIFT Payment Interbank Gateway - Critical</option>
+              </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 text-xs">
+              <div>
+                <label class="text-slate-400 block mb-1">Likelihood (1-5):</label>
+                <input type="number" id="grcLikelihood" min="1" max="5" value="4" onchange="calcRisk()" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-white">
+              </div>
+              <div>
+                <label class="text-slate-400 block mb-1">Impact (1-5):</label>
+                <input type="number" id="grcImpact" min="1" max="5" value="5" onchange="calcRisk()" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-white">
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs text-slate-400 mb-1">
+                <span>Control Effectiveness:</span>
+                <span id="controlEffLabel" class="text-sky-400 font-bold">60%</span>
+              </div>
+              <input type="range" id="grcControlEff" min="0" max="100" value="60" step="5" oninput="calcRisk()" class="w-full">
+            </div>
+
+            <div class="pt-3 border-t border-slate-800 grid grid-cols-2 gap-3 text-center">
+              <div class="p-2.5 rounded bg-slate-950">
+                <span class="text-[10px] text-slate-500 uppercase block">INHERENT RISK</span>
+                <span class="text-lg font-bold text-red-400" id="inherentScore">20.0</span>
+                <span class="text-[10px] font-semibold block text-red-400" id="inherentLvl">Critical</span>
+              </div>
+              <div class="p-2.5 rounded bg-slate-950">
+                <span class="text-[10px] text-slate-500 uppercase block">RESIDUAL RISK</span>
+                <span class="text-lg font-bold text-amber-400" id="residualScore">8.0</span>
+                <span class="text-[10px] font-semibold block text-amber-400" id="residualLvl">Medium</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TAB 5: SIGMA RULES & THREAT INTEL ==================== -->
+    <div id="tab-sigma" class="tab-content hidden space-y-6">
+      <div class="glass-card p-6">
+        <h2 class="text-base font-bold text-white mb-2">Sigma Detection Signatures & Threat Intel Hub</h2>
+        <p class="text-xs text-slate-400 mb-4">Standardized MITRE ATT&CK mapped detection rules for enterprise banking SIEMs.</p>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-800 text-slate-400 uppercase text-[10px]">
+              <tr>
+                <th class="p-2.5">Rule ID</th>
+                <th class="p-2.5">Rule Name</th>
+                <th class="p-2.5">Log Source</th>
+                <th class="p-2.5">Severity</th>
+                <th class="p-2.5">MITRE Technique</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800 font-mono text-[11px]">
+              <tr class="hover:bg-slate-800/40">
+                <td class="p-2.5 text-sky-400 font-bold">SIG-001</td>
+                <td class="p-2.5 font-sans text-white font-medium">Suspicious PowerShell Execution</td>
+                <td class="p-2.5 text-slate-400">process_creation (windows)</td>
+                <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-orange-500/20 text-orange-400">HIGH</span></td>
+                <td class="p-2.5 text-slate-300">T1059.001</td>
+              </tr>
+              <tr class="hover:bg-slate-800/40">
+                <td class="p-2.5 text-sky-400 font-bold">SIG-002</td>
+                <td class="p-2.5 font-sans text-white font-medium">Ransomware File Indicators (.lockbit)</td>
+                <td class="p-2.5 text-slate-400">file_event (windows)</td>
+                <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-red-500/20 text-red-400">CRITICAL</span></td>
+                <td class="p-2.5 text-slate-300">T1486</td>
+              </tr>
+              <tr class="hover:bg-slate-800/40">
+                <td class="p-2.5 text-sky-400 font-bold">SIG-003</td>
+                <td class="p-2.5 font-sans text-white font-medium">Credential Dumping via LSASS</td>
+                <td class="p-2.5 text-slate-400">process_access (windows)</td>
+                <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-red-500/20 text-red-400">CRITICAL</span></td>
+                <td class="p-2.5 text-slate-300">T1003.001</td>
+              </tr>
+              <tr class="hover:bg-slate-800/40">
+                <td class="p-2.5 text-sky-400 font-bold">SIG-004</td>
+                <td class="p-2.5 font-sans text-white font-medium">C2 Beaconing Detection</td>
+                <td class="p-2.5 text-slate-400">network_connection</td>
+                <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-orange-500/20 text-orange-400">HIGH</span></td>
+                <td class="p-2.5 text-slate-300">T1071</td>
+              </tr>
+              <tr class="hover:bg-slate-800/40">
+                <td class="p-2.5 text-sky-400 font-bold">SIG-006</td>
+                <td class="p-2.5 font-sans text-white font-medium">DNS Tunneling Data Exfiltration</td>
+                <td class="p-2.5 text-slate-400">dns_query</td>
+                <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-orange-500/20 text-orange-400">HIGH</span></td>
+                <td class="p-2.5 text-slate-300">T1048</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800/80 px-6 py-4 text-center text-xs text-slate-500">
+    Febriyansyah — IT Cybersecurity & Infrastructure Leader (15+ yrs, Banking) | MTI Candidate | POJK & NIST Aligned
+  </footer>
+
+  <!-- JavaScript for Interactivity -->
+  <script>
+    // Tab Switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('border-sky-400', 'text-sky-400');
+        btn.classList.add('border-transparent', 'text-slate-400');
+      });
+      document.getElementById('tab-' + tabId).classList.remove('hidden');
+      const activeBtn = document.getElementById('tab-btn-' + tabId);
+      activeBtn.classList.remove('border-transparent', 'text-slate-400');
+      activeBtn.classList.add('border-sky-400', 'text-sky-400');
+    }
+
+    // SOAR Trigger Toast
+    function triggerSoarAction(msg) {
+      const toast = document.getElementById('soarToast');
+      const toastMsg = document.getElementById('soarToastMsg');
+      toastMsg.textContent = 'SOAR Action Executed: ' + msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => { toast.classList.add('hidden'); }, 4000);
+    }
+
+    // Phishing Preset Setter
+    function setPhishPreset(url) {
+      document.getElementById('phishUrlInput').value = url;
+      analyzeUrl();
+    }
+
+    // Heuristic URL Analyzer in JS
+    function analyzeUrl() {
+      const url = document.getElementById('phishUrlInput').value.trim();
+      const len = url.length;
+      const dots = (url.match(/\./g) || []).length;
+      const hyphens = (url.match(/-/g) || []).length;
+      const hasHttps = url.startsWith('https://');
+      const hasIp = /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(url);
+
+      document.getElementById('featLen').textContent = len + ' chars';
+      document.getElementById('featDots').textContent = dots + ' dots';
+      document.getElementById('featHyphens').textContent = hyphens + (hyphens > 1 ? ' (Spoof risk)' : '');
+      document.getElementById('featHttps').textContent = hasHttps ? 'YES (TLS)' : 'NO (Unencrypted)';
+      document.getElementById('featHttps').className = hasHttps ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold';
+
+      const isPhish = hasIp || hyphens >= 2 || dots >= 3 || (!hasHttps && len > 40) || url.includes('.xyz') || url.includes('login') || url.includes('verify');
+      const resBox = document.getElementById('phishResult');
+      const vText = document.getElementById('verdictText');
+      const vIcon = document.getElementById('verdictIcon');
+      const vConf = document.getElementById('verdictConf');
+      const vBadge = document.getElementById('verdictBadge');
+
+      if (isPhish) {
+        resBox.className = 'mt-6 p-4 rounded-xl border border-red-500/40 bg-red-950/20';
+        vIcon.textContent = '🚨';
+        vText.textContent = 'PHISHING DETECTED BY ML HEURISTICS';
+        vText.className = 'text-sm font-bold text-red-400';
+        vConf.textContent = '91.4%';
+        vBadge.textContent = 'BLOCK RECOMMENDED';
+        vBadge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30';
+      } else {
+        resBox.className = 'mt-6 p-4 rounded-xl border border-emerald-500/40 bg-emerald-950/20';
+        vIcon.textContent = '✅';
+        vText.textContent = 'LEGITIMATE ENTERPRISE PATTERN';
+        vText.className = 'text-sm font-bold text-emerald-400';
+        vConf.textContent = '96.2%';
+        vBadge.textContent = 'SAFE TO PROCEED';
+        vBadge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+      }
+    }
+
+    // 5x5 Risk Matrix Builder & Calculator
+    function buildMatrix() {
+      const container = document.getElementById('riskMatrixGrid');
+      container.innerHTML = '';
+      for (let L = 5; L >= 1; L--) {
+        for (let I = 1; I <= 5; I++) {
+          const score = L * I;
+          const cell = document.createElement('div');
+          cell.className = 'matrix-cell p-2.5 rounded text-white flex flex-col justify-center items-center h-12 shadow';
+          if (score >= 20) cell.style.background = '#ef4444';
+          else if (score >= 12) cell.style.background = '#f97316';
+          else if (score >= 6) cell.style.background = '#eab308';
+          else cell.style.background = '#10b981';
+
+          cell.innerHTML = `<span>${score}</span><span class="text-[9px] opacity-75">L${L}×I${I}</span>`;
+          cell.onclick = () => {
+            document.getElementById('grcLikelihood').value = L;
+            document.getElementById('grcImpact').value = I;
+            calcRisk();
+          };
+          container.appendChild(cell);
+        }
+      }
+    }
+
+    function calcRisk() {
+      const L = Math.min(5, Math.max(1, parseInt(document.getElementById('grcLikelihood').value) || 1));
+      const I = Math.min(5, Math.max(1, parseInt(document.getElementById('grcImpact').value) || 1));
+      const eff = parseInt(document.getElementById('grcControlEff').value) / 100.0;
+      document.getElementById('controlEffLabel').textContent = Math.round(eff * 100) + '%';
+
+      const inh = (L * I).toFixed(1);
+      const res = ((L * I) * (1 - eff)).toFixed(1);
+
+      document.getElementById('inherentScore').textContent = inh;
+      document.getElementById('residualScore').textContent = res;
+
+      const getLvl = (s) => s >= 20 ? 'Critical' : s >= 10 ? 'High' : s >= 5 ? 'Medium' : 'Low';
+      document.getElementById('inherentLvl').textContent = getLvl(inh);
+      document.getElementById('residualLvl').textContent = getLvl(res);
+    }
+
+    // Initialize Chart.js
+    window.addEventListener('load', () => {
+      buildMatrix();
+      calcRisk();
+
+      // Telemetry Chart
+      const ctxTelem = document.getElementById('telemetryChart').getContext('2d');
+      new Chart(ctxTelem, {
+        type: 'line',
+        data: {
+          labels: ['00:00', '02:00', '04:00', '06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'],
+          datasets: [
+            {
+              label: 'Total Ingested (x1000)',
+              data: [42, 38, 35, 45, 68, 85, 92, 110, 88, 76, 58, 48],
+              borderColor: '#38bdf8',
+              backgroundColor: 'rgba(56, 189, 248, 0.1)',
+              fill: true,
+              tension: 0.3
+            },
+            {
+              label: 'Threat Events',
+              data: [3, 2, 1, 5, 12, 18, 14, 45, 19, 8, 4, 2],
+              borderColor: '#ef4444',
+              backgroundColor: '#ef4444',
+              type: 'bar'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: '#94a3b8' } } },
+          scales: {
+            x: { ticks: { color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { ticks: { color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+          }
+        }
+      });
+
+      // Tactics Doughnut Chart
+      const ctxTactics = document.getElementById('tacticsChart').getContext('2d');
+      new Chart(ctxTactics, {
+        type: 'doughnut',
+        data: {
+          labels: ['Initial Access', 'Credential Access', 'Defense Evasion', 'C2 Beaconing', 'Discovery'],
+          datasets: [{
+            data: [24, 48, 18, 12, 38],
+            backgroundColor: ['#38bdf8', '#f59e0b', '#ef4444', '#8b5cf6', '#10b981'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 10, font: { size: 10 } } } }
+        }
+      });
+    });
+  </script>
+</body>
+</html>
